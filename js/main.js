@@ -25,7 +25,7 @@ if ("IntersectionObserver" in window) {
 }
 
 // Contact form (sends through Formspree without leaving the page)
-const form = document.querySelector("form[data-formspree]");
+const form = document.querySelector("form[data-ajax-form]");
 if (form) {
   const topic = new URLSearchParams(location.search).get("topic");
   if (topic && form.topic.querySelector(`option[value="${topic}"]`)) form.topic.value = topic;
@@ -43,7 +43,8 @@ if (form) {
         body: new FormData(form),
         headers: { Accept: "application/json" },
       });
-      if (!res.ok) throw new Error();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.errors?.map((x) => x.message).join(", "));
       form.reset();
       status.classList.add("ok");
       status.textContent = "Thank you! Your message is on its way to our phones. We'll be in touch soon.";
